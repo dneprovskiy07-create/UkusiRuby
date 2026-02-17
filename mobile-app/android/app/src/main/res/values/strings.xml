@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">UkusiRuby</string>
+    <string name="title_activity_main">UkusiRuby</string>
+    <string name="package_name">com.ukusiruby.app</string>
+    <string name="custom_url_scheme">com.ukusiruby.app</string>
+</resources>
