@@ -7,8 +7,10 @@ import {
     Param,
     Query,
 } from '@nestjs/common';
+import { Public } from '../auth/public.decorator';
 import { OrdersService } from './orders.service';
 
+@Public()
 @Controller('api/orders')
 export class OrdersController {
     constructor(private readonly ordersService: OrdersService) { }

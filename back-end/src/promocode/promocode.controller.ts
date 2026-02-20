@@ -10,6 +10,7 @@ import {
 import { Public } from '../auth/public.decorator';
 import { PromocodeService } from './promocode.service';
 
+@Public()
 @Controller('api/promocodes')
 export class PromocodeController {
     constructor(private readonly promoService: PromocodeService) { }

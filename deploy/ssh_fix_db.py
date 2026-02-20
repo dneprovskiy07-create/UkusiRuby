@@ -5,55 +5,29 @@ host = '45.94.158.17'
 user = 'root'
 password = 'YSZmhSr018dy89cUK9'
 
-jwt_secret = '17ae664b43a6d757c80c58c1aaf39bc8df64530ca40d90a36aeafcc4ac7ef706'
-
 commands = [
-    # Switch to production
-    ("SET PROD ECO", "sed -i \"s/NODE_ENV: 'development'/NODE_ENV: 'production'/\" /var/www/ukusiruby/deploy/ecosystem.config.js"),
-    ("SET PROD ENV", f"""cat > /var/www/ukusiruby/back-end/.env << 'EOF'
-DB_HOST=localhost
-DB_PORT=5432
-DB_USERNAME=ukusi_user
-DB_PASSWORD=UkusiSecure2026!
-DB_NAME=ukusiruby_db
-APP_PORT=3000
-JWT_SECRET={jwt_secret}
-NODE_ENV=production
-EOF"""),
+    # Check banner table columns
+    ("BANNER COLS", "sudo -u postgres psql -d ukusiruby_db -c '\\d banners' 2>&1"),
     
-    # Restart in production
-    ("RESTART", "pm2 restart ukusiruby-backend --update-env 2>&1 | tail -3"),
-    ("WAIT", "sleep 8"),
+    # Insert banners with correct columns
+    ("INSERT BANNERS", """sudo -u postgres psql -d ukusiruby_db -c "
+INSERT INTO banners (image_url, sort_order, is_active) VALUES
+('https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=800&h=300&fit=crop', 1, true),
+('https://images.unsplash.com/photo-1563612116625-3012372fccce?w=800&h=300&fit=crop', 2, true),
+('https://images.unsplash.com/photo-1617196034796-73dfa7b1fd56?w=800&h=300&fit=crop', 3, true);
+" 2>&1"""),
+
+    # Verify
+    ("VERIFY BANNERS", "sudo -u postgres psql -d ukusiruby_db -c 'SELECT id, sort_order, is_active FROM banners;' 2>&1"),
     
-    # === SECURITY VERIFICATION ===
-    ("SEC: .env blocked", "curl -s -o /dev/null -w '%{http_code}' http://localhost/.env"),
-    ("SEC: .git blocked", "curl -s -o /dev/null -w '%{http_code}' http://localhost/.git/config"),
-    ("SEC: headers", "curl -sI http://localhost/ | grep -i 'x-frame\\|x-content\\|x-xss\\|referrer'"),
-    
-    # === FUNCTIONALITY VERIFICATION ===
-    ("API: settings", "curl -s http://localhost/api/settings | head -c 200"),
-    ("API: catalog", "curl -s http://localhost/api/catalog/categories | head -c 200"),
-    ("ADMIN: panel", "curl -s -o /dev/null -w '%{http_code}' http://localhost/admin/"),
-    ("CLIENT: app", "curl -s -o /dev/null -w '%{http_code}' http://localhost/"),
-    
-    # === INFRASTRUCTURE ===
-    ("PM2: status", "pm2 list 2>&1 | grep ukusi"),
-    ("PM2: restarts", "pm2 jlist 2>&1 | python3 -c \"import json,sys;d=json.load(sys.stdin);print(f'Restarts: {d[0][\\\"pm2_env\\\"][\\\"restart_time\\\"]}, Status: {d[0][\\\"pm2_env\\\"][\\\"status\\\"]}, Uptime: {d[0][\\\"pm2_env\\\"][\\\"pm_uptime\\\"]}')\" 2>&1"),
-    ("PORT: 3000", "ss -tlnp | grep 3000"),
-    
-    # Verify ecosystem in prod mode
-    ("ECO CHECK", "grep NODE_ENV /var/www/ukusiruby/deploy/ecosystem.config.js"),
-    ("ENV CHECK", "grep NODE_ENV /var/www/ukusiruby/back-end/.env"),
+    # Final API test
+    ("API: banners", "curl -s http://localhost:3000/api/banners | head -c 300"),
 ]
 
 try:
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     client.connect(host, username=user, password=password, timeout=10)
-    
-    print("=" * 60)
-    print("FINAL SECURITY VERIFICATION REPORT")
-    print("=" * 60)
     
     for label, cmd in commands:
         stdin, stdout, stderr = client.exec_command(cmd, timeout=15)
@@ -66,7 +40,6 @@ try:
         sys.stdout.buffer.flush()
     
     client.close()
-    sys.stdout.buffer.write(b"\n=== VERIFICATION COMPLETE ===\n")
 except Exception as e:
     sys.stdout.buffer.write(f"Error: {e}\n".encode('utf-8', errors='replace'))
     sys.exit(1)

@@ -8,7 +8,9 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import { Public } from '../auth/public.decorator';
 
+@Public()
 @Controller('api/upload')
 export class UploadController {
     @Post()

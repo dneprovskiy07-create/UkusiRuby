@@ -2,6 +2,7 @@ import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common'
 import { Public } from '../auth/public.decorator';
 import { SettingsService } from './settings.service';
 
+@Public()
 @Controller('api/settings')
 export class SettingsController {
     constructor(private readonly settingsService: SettingsService) { }

@@ -11,6 +11,7 @@ import {
 import { Public } from '../auth/public.decorator';
 import { BannerService } from './banner.service';
 
+@Public()
 @Controller('api/banners')
 export class BannerController {
     constructor(private readonly bannerService: BannerService) { }

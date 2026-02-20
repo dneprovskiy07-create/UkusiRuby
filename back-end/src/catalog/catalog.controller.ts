@@ -11,6 +11,7 @@ import {
 import { Public } from '../auth/public.decorator';
 import { CatalogService } from './catalog.service';
 
+@Public()
 @Controller('api')
 export class CatalogController {
     constructor(private readonly catalogService: CatalogService) { }
