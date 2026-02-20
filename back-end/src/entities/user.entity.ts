@@ -30,7 +30,7 @@ export class User {
     @Column({ nullable: true, select: false })
     reset_token: string;
 
-    @Column({ nullable: true, type: 'datetime' })
+    @Column({ nullable: true, type: 'timestamp' })
     reset_token_expires: Date;
 
     @Column({ default: true })
