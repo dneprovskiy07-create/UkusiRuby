@@ -14,22 +14,26 @@ export class SettingsService implements OnModuleInit {
     ) { }
 
     async onModuleInit() {
-        // Ensure default settings exist
-        const defaults = [
-            { key: 'delivery_fee', value: '50', description: 'Стоимость доставки (₴)' },
-            { key: 'min_order_amount', value: '200', description: 'Минимальная сумма заказа (₴)' },
-            { key: 'delivery_time', value: '30–50 минут', description: 'Время доставки' },
-            { key: 'support_phone', value: '+380 44 123 45 67', description: 'Телефон поддержки' },
-            { key: 'loyalty_enabled', value: 'false', description: 'Включена ли программа лояльности' },
-            { key: 'cashback_percent', value: '5', description: 'Процент кэшбэка' },
-            { key: 'max_cashback_use_percent', value: '50', description: 'Макс. % оплаты бонусами' },
-        ];
+        try {
+            // Ensure default settings exist
+            const defaults = [
+                { key: 'delivery_fee', value: '50', description: 'Стоимость доставки (₴)' },
+                { key: 'min_order_amount', value: '200', description: 'Минимальная сумма заказа (₴)' },
+                { key: 'delivery_time', value: '30–50 минут', description: 'Время доставки' },
+                { key: 'support_phone', value: '+380 44 123 45 67', description: 'Телефон поддержки' },
+                { key: 'loyalty_enabled', value: 'false', description: 'Включена ли программа лояльности' },
+                { key: 'cashback_percent', value: '5', description: 'Процент кэшбэка' },
+                { key: 'max_cashback_use_percent', value: '50', description: 'Макс. % оплаты бонусами' },
+            ];
 
-        for (const d of defaults) {
-            const exists = await this.settingRepo.findOneBy({ key: d.key });
-            if (!exists) {
-                await this.settingRepo.save(this.settingRepo.create(d));
+            for (const d of defaults) {
+                const exists = await this.settingRepo.findOneBy({ key: d.key });
+                if (!exists) {
+                    await this.settingRepo.save(this.settingRepo.create(d));
+                }
             }
+        } catch (error) {
+            console.warn('[SettingsService] Could not seed defaults (table may not exist yet):', error.message);
         }
     }
 

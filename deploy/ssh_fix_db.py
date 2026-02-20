@@ -6,20 +6,38 @@ user = 'root'
 password = 'YSZmhSr018dy89cUK9'
 
 commands = [
-    # Check PM2 current status - is it running or crashing?
-    ("PM2 LIST", "pm2 list 2>&1"),
+    # Temporarily set NODE_ENV to development in ecosystem
+    ("SET DEV IN ECO", "sed -i \"s/NODE_ENV: 'production'/NODE_ENV: 'development'/\" /var/www/ukusiruby/deploy/ecosystem.config.js"),
     
-    # Error log tail
-    ("PM2 ERROR LOG", "pm2 logs ukusiruby-backend --nostream --err --lines 15 2>&1"),
+    # Delete and restart with updated config
+    ("RESTART", "pm2 delete all 2>&1; cd /var/www/ukusiruby && pm2 start deploy/ecosystem.config.js 2>&1 | tail -3"),
     
-    # Test DB connection directly
-    ("TEST DB CONN", "PGPASSWORD='UkusiSecure2026!' psql -U ukusi_user -h localhost -d ukusiruby_db -c 'SELECT 1;' 2>&1"),
+    # Wait for tables to be created
+    ("WAIT", "sleep 10"),
     
-    # Check .env content
-    ("ENV CONTENT", "cat /var/www/ukusiruby/back-end/.env"),
+    # Check tables
+    ("TABLES", "sudo -u postgres psql -d ukusiruby_db -c '\\dt' 2>&1"),
     
-    # Check what port the app is trying to use
-    ("PORT CHECK", "pm2 logs ukusiruby-backend --nostream --lines 5 2>&1"),
+    # Check API
+    ("API TEST", "curl -s http://localhost:3000/api/settings | head -c 150"),
+    
+    # Check PM2 status
+    ("PM2", "pm2 list 2>&1 | grep ukusi"),
+    
+    # Now set back to production
+    ("SET PROD", "sed -i \"s/NODE_ENV: 'development'/NODE_ENV: 'production'/\" /var/www/ukusiruby/deploy/ecosystem.config.js"),
+    
+    # Restart in production
+    ("RESTART PROD", "pm2 delete all 2>&1; cd /var/www/ukusiruby && pm2 start deploy/ecosystem.config.js 2>&1 | tail -3"),
+    
+    # Wait
+    ("WAIT2", "sleep 5"),
+    
+    # Final test
+    ("FINAL", "curl -s http://localhost:3000/api/settings | head -c 150"),
+    
+    # PM2 final
+    ("PM2 FINAL", "pm2 list 2>&1 | grep ukusi"),
 ]
 
 try:
@@ -28,7 +46,7 @@ try:
     client.connect(host, username=user, password=password, timeout=10)
     
     for label, cmd in commands:
-        stdin, stdout, stderr = client.exec_command(cmd, timeout=10)
+        stdin, stdout, stderr = client.exec_command(cmd, timeout=30)
         out = stdout.read().decode('utf-8', errors='ignore')
         err = stderr.read().decode('utf-8', errors='ignore')
         sys.stdout.buffer.write(f"=== {label} ===\n{out.strip()}\n".encode('utf-8', errors='replace'))
@@ -38,6 +56,7 @@ try:
         sys.stdout.buffer.flush()
     
     client.close()
+    sys.stdout.buffer.write(b"\n=== DONE ===\n")
 except Exception as e:
     sys.stdout.buffer.write(f"Error: {e}\n".encode('utf-8', errors='replace'))
     sys.exit(1)
