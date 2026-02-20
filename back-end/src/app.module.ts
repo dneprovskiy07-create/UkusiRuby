@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ServeStaticModule } from '@nestjs/serve-static';
+import { APP_GUARD } from '@nestjs/core';
 import { join } from 'path';
 import { CatalogModule } from './catalog/catalog.module';
 import { OrdersModule } from './orders/orders.module';
@@ -12,6 +13,8 @@ import { UploadModule } from './upload/upload.module';
 import { MailModule } from './mail/mail.module';
 import { SettingsModule } from './settings/settings.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { JwtAuthGuard } from './auth/jwt-auth.guard';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -39,6 +42,13 @@ import { NotificationsModule } from './notifications/notifications.module';
     MailModule,
     NotificationsModule,
     SettingsModule,
+    RedisModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
   ],
 })
 export class AppModule { }

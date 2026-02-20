@@ -1,10 +1,12 @@
 import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common';
+import { Public } from '../auth/public.decorator';
 import { SettingsService } from './settings.service';
 
 @Controller('api/settings')
 export class SettingsController {
     constructor(private readonly settingsService: SettingsService) { }
 
+    @Public()
     @Get()
     getSettings() {
         return this.settingsService.getSettings();
@@ -15,6 +17,7 @@ export class SettingsController {
         return this.settingsService.updateSetting(key, value);
     }
 
+    @Public()
     @Get('cities')
     getCities() {
         return this.settingsService.getCities();

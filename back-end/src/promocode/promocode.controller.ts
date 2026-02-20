@@ -7,6 +7,7 @@ import {
     Param,
     Query,
 } from '@nestjs/common';
+import { Public } from '../auth/public.decorator';
 import { PromocodeService } from './promocode.service';
 
 @Controller('api/promocodes')
@@ -18,6 +19,7 @@ export class PromocodeController {
         return this.promoService.getAll(cityId);
     }
 
+    @Public()
     @Get('visible')
     getVisible(@Query('city_id') cityId?: number, @Query('user_id') userId?: string) {
         return this.promoService.getVisible(cityId, userId);
@@ -33,6 +35,7 @@ export class PromocodeController {
         return this.promoService.create(data);
     }
 
+    @Public()
     @Post('validate')
     validate(@Body('code') code: string, @Body('city_id') cityId?: number) {
         return this.promoService.validate(code, cityId);

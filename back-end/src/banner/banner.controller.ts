@@ -8,17 +8,20 @@ import {
     Param,
     Query,
 } from '@nestjs/common';
+import { Public } from '../auth/public.decorator';
 import { BannerService } from './banner.service';
 
 @Controller('api/banners')
 export class BannerController {
     constructor(private readonly bannerService: BannerService) { }
 
+    @Public()
     @Get()
     getActive(@Query('city_id') cityId?: number) {
         return this.bannerService.getActive(cityId);
     }
 
+    @Public()
     @Get('all')
     getAll(@Query('city_id') cityId?: number) {
         return this.bannerService.getAll(cityId);

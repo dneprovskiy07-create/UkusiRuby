@@ -1,14 +1,14 @@
-import { Injectable, BadRequestException, UnauthorizedException, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException, UnauthorizedException, NotFoundException, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { JwtService } from '@nestjs/jwt';
 import { User } from '../entities/user.entity';
 import { Address } from '../entities/address.entity';
 import { scryptSync, randomBytes, timingSafeEqual } from 'node:crypto';
+import Redis from 'ioredis';
 
 import { MailService } from '../mail/mail.service';
-
-// В реальном приложении тут будет Redis для OTP
-const otpStore = new Map<string, string>();
+import { REDIS_CLIENT } from '../redis/redis.module';
 
 @Injectable()
 export class AuthService {
@@ -18,7 +18,14 @@ export class AuthService {
         @InjectRepository(Address)
         private readonly addressRepo: Repository<Address>,
         private readonly mailService: MailService,
+        private readonly jwtService: JwtService,
+        @Inject(REDIS_CLIENT) private readonly redis: Redis,
     ) { }
+
+    private generateToken(user: User) {
+        const payload = { sub: user.id, email: user.email };
+        return this.jwtService.sign(payload);
+    }
 
     // --- Helpers for Password Hashing (MVP withoutbcrypt) ---
     private hashPassword(password: string): string {
@@ -83,15 +90,18 @@ export class AuthService {
             throw new UnauthorizedException('Неверный email или пароль');
         }
 
-        // Return user without password
+        // Return user without password + JWT token
         const { password, ...result } = user;
-        return result;
+        return {
+            user: result,
+            access_token: this.generateToken(user),
+        };
     }
 
     async sendOtp(phone: string) {
-        // Генерируем 4-значный код (MVP — хранение в памяти)
+        // Генерируем 4-значный код, храним в Redis с TTL 5 минут
         const code = String(Math.floor(1000 + Math.random() * 9000));
-        otpStore.set(phone, code);
+        await this.redis.set(`otp:${phone}`, code, 'EX', 300); // 5 minutes
 
         // TODO: Отправка SMS через провайдера (Twilio, SMS.ru, etc.)
         console.log(`[OTP] ${phone} → ${code}`);
@@ -100,12 +110,12 @@ export class AuthService {
     }
 
     async verifyOtp(phone: string, code: string) {
-        const stored = otpStore.get(phone);
+        const stored = await this.redis.get(`otp:${phone}`);
         if (!stored || stored !== code) {
             return { success: false, message: 'Неверный код' };
         }
 
-        otpStore.delete(phone);
+        await this.redis.del(`otp:${phone}`);
 
         // Найти или создать пользователя
         let user = await this.userRepo.findOneBy({ phone });
@@ -114,7 +124,11 @@ export class AuthService {
             user = await this.userRepo.save(user);
         }
 
-        return { success: true, user };
+        return {
+            success: true,
+            user,
+            access_token: this.generateToken(user),
+        };
     }
 
     async forgotPassword(email: string) {

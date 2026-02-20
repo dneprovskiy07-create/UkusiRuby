@@ -8,13 +8,15 @@ import {
     Param,
     Query,
 } from '@nestjs/common';
+import { Public } from '../auth/public.decorator';
 import { CatalogService } from './catalog.service';
 
 @Controller('api')
 export class CatalogController {
     constructor(private readonly catalogService: CatalogService) { }
 
-    // ── Категории ──
+    // ── Категории (GET — public, POST/PUT/DELETE — admin) ──
+    @Public()
     @Get('categories')
     getCategories(
         @Query('all') all?: string,
@@ -24,6 +26,7 @@ export class CatalogController {
         return this.catalogService.getCategories(cityId);
     }
 
+    @Public()
     @Get('categories/:id')
     getCategoryById(@Param('id') id: number) {
         return this.catalogService.getCategoryById(id);
@@ -50,7 +53,8 @@ export class CatalogController {
         return { success: true };
     }
 
-    // ── Товары ──
+    // ── Товары (GET — public, POST/PUT/DELETE — admin) ──
+    @Public()
     @Get('products')
     getProducts(
         @Query('category_id') categoryId?: number,
@@ -62,6 +66,7 @@ export class CatalogController {
         return this.catalogService.getProducts(categoryId, sort, cityId);
     }
 
+    @Public()
     @Get('products/search')
     searchProducts(
         @Query('q') q: string,
@@ -70,6 +75,7 @@ export class CatalogController {
         return this.catalogService.searchProducts(q, cityId);
     }
 
+    @Public()
     @Get('products/:id')
     getProductById(@Param('id') id: string) {
         return this.catalogService.getProductById(id);
@@ -96,7 +102,8 @@ export class CatalogController {
         return { success: true };
     }
 
-    // ── Точки самовывоза ──
+    // ── Точки самовывоза (GET — public) ──
+    @Public()
     @Get('pickup-points')
     getPickupPoints(@Query('city_id') cityId: number) {
         return this.catalogService.getPickupPoints(cityId);
