@@ -3,7 +3,7 @@
 // Fallback: uses mock data when backend is unavailable
 // ═══════════════════════════════════════════
 
-const BASE = 'http://45.94.158.17/api';
+const BASE = 'https://ukusiruby.com/api';
 
 export async function request(url, options = {}) {
     try {
