@@ -1,5 +1,26 @@
 {
   "appId": "com.ukusiruby.app",
-  "appName": "UkusiRuby",
-  "webDir": "dist"
+  "appName": "Укуси Рыбу",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https",
+    "iosScheme": "capacitor"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "launchAutoHide": true,
+      "backgroundColor": "#FF6B35",
+      "showSpinner": false,
+      "iosSpinnerStyle": "small",
+      "spinnerColor": "#FFFFFF"
+    },
+    "StatusBar": {
+      "style": "LIGHT",
+      "backgroundColor": "#FF6B35"
+    },
+    "CapacitorHttp": {
+      "enabled": true
+    }
+  }
 }

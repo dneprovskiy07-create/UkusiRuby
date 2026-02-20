@@ -20,12 +20,20 @@ async function bootstrap() {
   // CORS — только разрешённые источники
   app.enableCors({
     origin: [
+      // Production server
       'http://45.94.158.17',
       'https://45.94.158.17',
+      // Domain (when DNS is configured)
       'http://ukusiruby.com',
       'https://ukusiruby.com',
+      'http://www.ukusiruby.com',
+      'https://www.ukusiruby.com',
+      // Capacitor mobile app origins
+      'capacitor://localhost',
+      'ionic://localhost',
+      'http://localhost',
+      // Dev (remove in final production)
       'http://localhost:5173',
-      'http://localhost:5174',
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
