@@ -132,7 +132,7 @@ export class CatalogController {
         try {
             return await this.catalogService.migrateExistingData();
         } catch (e) {
-            return { success: false, error: e.message, stack: e.stack };
+            return { success: false, error: e.message };
         }
     }
 }

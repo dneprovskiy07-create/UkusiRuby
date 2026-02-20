@@ -5,10 +5,16 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Включаем CORS для мобильного приложения и админ-панели
+  // CORS — только разрешённые источники
   app.enableCors({
-    origin: '*',
+    origin: [
+      'http://45.94.158.17',
+      'https://ukusiruby.com',
+      'http://localhost:5173',
+      'http://localhost:5174',
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
   });
 
   // Глобальная валидация

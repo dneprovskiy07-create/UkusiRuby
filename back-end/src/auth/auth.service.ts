@@ -65,7 +65,8 @@ export class AuthService {
             }
         }
 
-        return savedUser;
+        const { password: _, reset_token: _rt, ...safeUser } = savedUser as any;
+        return safeUser;
     }
 
     async login(data: { email: string; password: string }) {
