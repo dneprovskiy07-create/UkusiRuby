@@ -15,7 +15,7 @@ export function getImageUrl(path) {
     }
 
     // For absolute BASE:
-    return `http://localhost:3000${path}`;
+    return path; // Return as is, let the browser handle it relative to the domain
 }
 
 async function request(url, options = {}) {

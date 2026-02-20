@@ -99,8 +99,7 @@ export default function App() {
     const handleCityChange = (city) => {
         setActiveCity(city)
         localStorage.setItem('admin_active_city', JSON.stringify(city))
-        // Force reload relevant pages or trigger refetch
-        window.location.reload() // Simplest way to ensure all components refetch with new city context
+        // window.location.reload() // Removed to prevent redirection issues
     }
 
     return (
@@ -1513,10 +1512,8 @@ function SettingsPage({ showToast, activeCity }) {
         if (activeCity) {
             await api.updateCity(activeCity.id, citySettings)
             showToast(`Настройки для ${activeCity.name} сохранены!`)
-            setTimeout(() => window.location.reload(), 1000)
         } else {
             showToast('Настройки сохранены!')
-            setTimeout(() => window.location.reload(), 1000)
         }
     }
 

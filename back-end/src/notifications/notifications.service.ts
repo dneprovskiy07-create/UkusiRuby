@@ -1,10 +1,10 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { MailService } from '../mail/mail.service';
-import * as TelegramBot from 'node-telegram-bot-api';
+const TelegramBot = require('node-telegram-bot-api');
 
 @Injectable()
 export class NotificationsService implements OnModuleInit {
-    private bot: TelegramBot;
+    private bot: any;
     // TODO: Move to .env
     private readonly telegramToken = '7746369230:AAF-7Xqj10A7SEvw19_PLACEHOLDER';
     private readonly adminChatId = '123456789_PLACEHOLDER';
@@ -13,10 +13,30 @@ export class NotificationsService implements OnModuleInit {
     constructor(private readonly mailService: MailService) { }
 
     onModuleInit() {
-        // Initialize bot if token is present
-        if (this.telegramToken && this.telegramToken.length > 10) {
-            this.bot = new TelegramBot(this.telegramToken, { polling: false });
-            console.log('[Notifications] Telegram Bot initialized');
+        try {
+            if (this.telegramToken && this.telegramToken.length > 10) {
+                console.log('[Notifications] Initializing Telegram Bot...');
+                let TelegramBotClass;
+                try {
+                    TelegramBotClass = require('node-telegram-bot-api');
+                } catch (e) {
+                    console.error('[Notifications] Could not require node-telegram-bot-api');
+                    return;
+                }
+
+                const BotConstructor = typeof TelegramBotClass === 'function'
+                    ? TelegramBotClass
+                    : (TelegramBotClass.default || TelegramBotClass);
+
+                if (typeof BotConstructor === 'function') {
+                    this.bot = new BotConstructor(this.telegramToken, { polling: false });
+                    console.log('[Notifications] Telegram Bot initialized successfully');
+                } else {
+                    console.error('[Notifications] TelegramBot is not a constructor, skipping bot init');
+                }
+            }
+        } catch (e) {
+            console.error('[Notifications] Critical error during bot init:', e.message);
         }
     }
 
