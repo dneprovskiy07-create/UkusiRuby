@@ -2,12 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>CAPACITOR_DEBUG</key>
-	<string>$(CAPACITOR_DEBUG)</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>Укуси Рыбу</string>
+	<string>Укуси Рыбу</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -60,5 +58,23 @@
 	<string>Доступ к фото нужен для загрузки фото профиля</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Доступ к местоположению нужен для определения ближайшего адреса доставки</string>
+
+	<!-- Export compliance — no non-exempt encryption used -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+
+	<!-- Deep-link URL scheme -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.ukusiruby.app</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>ukusiruby</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>
+
